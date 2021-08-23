@@ -3,7 +3,7 @@ import ReactDOM from 'react-dom'
 import './index.css'
 import {
     Box, Button, createTheme, CssBaseline, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, Divider,
-    FormControl, Grid, InputLabel, List, ListItem, ListItemSecondaryAction, ListItemText, MenuItem, Select, TextField, ThemeProvider
+    FormControl, Grid, InputLabel, ListItem, ListItemSecondaryAction, ListItemText, MenuItem, Select, TextField, ThemeProvider
 } from "@material-ui/core";
 import { Enchantment, enchantment, EnchantmentItem, findBestEnchantPath } from "./enchantment";
 import {GrayText, GreenButton, MoreGrayText, PrimaryButton, RedButton, LeftPaper, RightPaper, MyList, WideGrid, FillAvailableGrid} from "./custom-components";
@@ -59,9 +59,9 @@ function InputRoot() {
                                         <Grid item> <GrayText> 没有任何物品 </GrayText> </Grid>
                                     </Grid>
                                 } else {
-                                    return items.map((it, index) => {
+                                    return items.map((it) => {
                                         return <ListItem>
-                                            <ListItemText primary={`${it.isItem ? "物品" : "附魔书"} #${index}`} onClick={(e) => {
+                                            <ListItemText primary={`${it.isItem ? "物品" : "附魔书"} #${it.index}`} onClick={(e) => {
                                                 setEnchantmentViewSelected(it)
                                                 setEnchantmentViewOpen(true)
                                             }} />
@@ -104,7 +104,12 @@ function InputRoot() {
                     
                     onClick={(e) => {
                         try {
-                            console.log(findBestEnchantPath(items, undefined))
+                            var message: string = "最佳方案:"
+                            const steps = findBestEnchantPath(items, undefined)
+                            steps.forEach((step) => {
+                                message = message + " " + step.item.index + "+" + step.sacrifice.index + "->" + step.resultItem.index + " "
+                            })
+                            alert(message + "(最终物品)")
                         } catch (e) {
                             alert("只有一种方案")
                         }
@@ -184,14 +189,14 @@ function InputRoot() {
                 <Grid item container direction="row" alignItems="center" spacing={1}>
                     <WideGrid item>
                         <GreenButton variant="outlined" onClick={(e) => {
-                            setItems(items.concat([new EnchantmentItem(undefined, 0, true, ...currentEnchantments)]))
+                            setItems(items.concat([new EnchantmentItem(undefined, 0, true, false, ...currentEnchantments)]))
                             setCurrentEnchantments([])
                         }}> 添加为物品 </GreenButton>
                     </WideGrid>
 
                     <WideGrid item>
                         <GreenButton variant="outlined" onClick={(e) => {
-                            setItems(items.concat([new EnchantmentItem(undefined, 0, false, ...currentEnchantments)]))
+                            setItems(items.concat([new EnchantmentItem(undefined, 0, false, false, ...currentEnchantments)]))
                             setCurrentEnchantments([])
                         }}> 添加为附魔书 </GreenButton>
                     </WideGrid>

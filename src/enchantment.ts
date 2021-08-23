@@ -55,8 +55,12 @@ export class EnchantmentItem {
     public byStep: EnchantmentStep | null
     public anvilUses: number
     public isItem: boolean
+    public index: number
 
-    constructor(byStep: EnchantmentStep | undefined, anvilUses: number, isItem: boolean, ...enchantments: Enchantment[]) {
+    private static indexOrder: number = 0
+    private static resultNumber: number = 0
+
+    constructor(byStep: EnchantmentStep | undefined, anvilUses: number, isItem: boolean, isResult: boolean, ...enchantments: Enchantment[]) {
         this.enchantments = enchantments
         this.anvilUses = anvilUses
         this.isItem = isItem
@@ -66,7 +70,18 @@ export class EnchantmentItem {
             this.byStep = null
         }
 
+        this.index = EnchantmentItem.indexOrder
+        // if (isResult) {
+        //     EnchantmentItem.resultNumber += 1
+        // }
+        EnchantmentItem.indexOrder += 1
+
         this.sortEnchantments()
+    }
+
+    static cleanResultIndex() {
+        // EnchantmentItem.indexOrder -= EnchantmentItem.resultNumber
+        // EnchantmentItem.resultNumber = 0
     }
 
     sortEnchantments() {
@@ -97,6 +112,7 @@ export class EnchantmentStep {
     public item: EnchantmentItem
     public sacrifice: EnchantmentItem
     public anvilCount: number
+    public resultItem: EnchantmentItem
 
     constructor(item: EnchantmentItem, sacrifice: EnchantmentItem) {
         this.item = item;
@@ -107,10 +123,12 @@ export class EnchantmentStep {
         } else {
             this.anvilCount = this.sacrifice.anvilUses + 1
         }
+
+        this.resultItem = new EnchantmentItem(this, this.anvilCount, this.item.isItem, true, ...mergeEnchantment(this.item.enchantments, this.sacrifice.enchantments))
     }
 
     result(): EnchantmentItem {
-        return new EnchantmentItem(this, this.anvilCount, this.item.isItem, ...mergeEnchantment(this.item.enchantments, this.sacrifice.enchantments))
+        return this.resultItem
     }
 }
 
@@ -299,6 +317,7 @@ export function findBestEnchantPath(materials: EnchantmentItem[], expect: Enchan
         throw Error("There is only one way to do this. Just stop wasting your time and your pc's power pls!")
     }
 
+    EnchantmentItem.cleanResultIndex()
     return search(materials)
 }
 
